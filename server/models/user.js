@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 // {
-//   email: 'andrew@example.com',
+//   email: 'max@max.com',
 //   password: 'adpsofijasdfmpoijwerew',
 //   tokens: [{
 //     access: 'auth',
@@ -39,4 +39,4 @@ var User = mongoose.model('User', {
   }]
 });
 
-module.exports = {User}
+module.exports = { User }
