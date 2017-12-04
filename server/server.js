@@ -14,7 +14,6 @@ const port = process.env.PORT;
 
 app.use(bodyParser.json());
 
-
 //========================== ENDPOINTS ========================//
 
 // SAVE TODO LIST
@@ -124,7 +123,10 @@ app.post('/users', (req, res) => {
 	user
 		.save()
 		.then(user => {
-			res.send(user);
+			user.generateAuthToken();
+		})
+		.then(token => {
+			res.header('x-auth', token).send(user);
 		})
 		.catch(e => {
 			res.status(400).send(e);
