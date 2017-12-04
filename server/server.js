@@ -8,8 +8,9 @@ const { ObjectID } = require('mongodb');
 const { mongoose } = require('./db/mongoose');
 const { Todo } = require('./models/todo');
 const { User } = require('./models/user');
+const { authenticate } = require('./middleware/authenticate');
 
-var app = express();
+const app = express();
 const port = process.env.PORT;
 
 app.use(bodyParser.json());
@@ -18,7 +19,7 @@ app.use(bodyParser.json());
 
 // SAVE TODO LIST
 app.post('/todos', (req, res) => {
-	var todo = new Todo({
+	let todo = new Todo({
 		text: req.body.text
 	});
 
@@ -46,7 +47,7 @@ app.get('/todos', (req, res) => {
 
 // GET SINGLE TODO ITEM
 app.get('/todos/:id', (req, res) => {
-	var id = req.params.id;
+	let id = req.params.id;
 
 	if (!ObjectID.isValid(id)) {
 		return res.status(404).send();
@@ -67,7 +68,7 @@ app.get('/todos/:id', (req, res) => {
 
 // DELETE SINGLE TODO ITEM
 app.delete('/todos/:id', (req, res) => {
-	var id = req.params.id;
+	let id = req.params.id;
 
 	if (!ObjectID.isValid(id)) {
 		return res.status(404).send();
@@ -88,8 +89,8 @@ app.delete('/todos/:id', (req, res) => {
 
 // EDIT SINGLE TODO ITEM
 app.patch('/todos/:id', (req, res) => {
-	var id = req.params.id;
-	var body = _.pick(req.body, ['text', 'completed']);
+	let id = req.params.id;
+	let body = _.pick(req.body, ['text', 'completed']);
 
 	if (!ObjectID.isValid(id)) {
 		return res.status(404).send();
@@ -117,13 +118,13 @@ app.patch('/todos/:id', (req, res) => {
 
 // CREATE NEW USER
 app.post('/users', (req, res) => {
-	var body = _.pick(req.body, ['email', 'password']);
-	var user = new User(body);
+	let body = _.pick(req.body, ['email', 'password']);
+	let user = new User(body);
 
 	user
 		.save()
-		.then(user => {
-			user.generateAuthToken();
+		.then(() => {
+			return user.generateAuthToken();
 		})
 		.then(token => {
 			res.header('x-auth', token).send(user);
@@ -131,6 +132,11 @@ app.post('/users', (req, res) => {
 		.catch(e => {
 			res.status(400).send(e);
 		});
+});
+
+// PRIVATE ROUTE
+app.get('/users/me', authenticate, (req, res) => {
+	res.send(req.user);
 });
 
 app.listen(port, () => {
